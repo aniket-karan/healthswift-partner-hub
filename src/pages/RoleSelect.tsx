@@ -1,13 +1,63 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Stethoscope, FlaskConical, ArrowRight } from "lucide-react";
+import { Stethoscope, FlaskConical, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const RoleSelect = () => {
   const navigate = useNavigate();
+  const { user, role, setUserRole, signOut, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [isSettingRole, setIsSettingRole] = useState<string | null>(null);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
+
+  // Redirect if role is already set
+  useEffect(() => {
+    if (!authLoading && role) {
+      if (role === "doctor") {
+        navigate("/doctor", { replace: true });
+      } else if (role === "diagnostic_center") {
+        navigate("/lab", { replace: true });
+      }
+    }
+  }, [authLoading, role, navigate]);
+
+  const handleRoleSelect = async (roleId: "doctor" | "diagnostic_center", path: string) => {
+    setIsSettingRole(roleId);
+    
+    const { error } = await setUserRole(roleId);
+    
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to set role",
+        description: error.message,
+      });
+      setIsSettingRole(null);
+    } else {
+      toast({
+        title: "Role set successfully!",
+        description: `Welcome to HealthSwift Partner.`,
+      });
+      navigate(path);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   const roles = [
     {
-      id: "doctor",
+      id: "doctor" as const,
       title: "Doctor",
       description: "Manage appointments, slots & prescriptions",
       icon: Stethoscope,
@@ -15,7 +65,7 @@ const RoleSelect = () => {
       gradient: "from-primary to-[hsl(174_72%_50%)]",
     },
     {
-      id: "lab",
+      id: "diagnostic_center" as const,
       title: "Diagnostic Center",
       description: "Upload reports & manage patient tests",
       icon: FlaskConical,
@@ -23,6 +73,14 @@ const RoleSelect = () => {
       gradient: "from-secondary to-[hsl(220_60%_35%)]",
     },
   ];
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top safe-bottom">
@@ -35,24 +93,30 @@ const RoleSelect = () => {
 
         {/* Role Cards */}
         <div className="space-y-4 stagger-children">
-          {roles.map((role) => {
-            const Icon = role.icon;
+          {roles.map((roleItem) => {
+            const Icon = roleItem.icon;
+            const isLoading = isSettingRole === roleItem.id;
+            
             return (
               <GlassCard
-                key={role.id}
+                key={roleItem.id}
                 elevated
-                onClick={() => navigate(role.path)}
-                className="group"
+                onClick={() => !isSettingRole && handleRoleSelect(roleItem.id, roleItem.path)}
+                className={`group ${isSettingRole && !isLoading ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${role.gradient} flex items-center justify-center shadow-button transition-transform duration-300 group-hover:scale-110`}
+                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${roleItem.gradient} flex items-center justify-center shadow-button transition-transform duration-300 group-hover:scale-110`}
                   >
-                    <Icon className="w-7 h-7 text-primary-foreground" />
+                    {isLoading ? (
+                      <Loader2 className="w-7 h-7 text-primary-foreground animate-spin" />
+                    ) : (
+                      <Icon className="w-7 h-7 text-primary-foreground" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">{role.title}</h3>
-                    <p className="text-sm text-muted-foreground">{role.description}</p>
+                    <h3 className="text-lg font-semibold text-foreground">{roleItem.title}</h3>
+                    <p className="text-sm text-muted-foreground">{roleItem.description}</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
                 </div>
@@ -65,7 +129,7 @@ const RoleSelect = () => {
         <p className="text-center text-xs text-muted-foreground mt-10">
           Wrong account?{" "}
           <button
-            onClick={() => navigate("/")}
+            onClick={handleSignOut}
             className="text-primary font-medium hover:underline"
           >
             Sign out

@@ -1,7 +1,6 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { FileText, Users, Bell, Clock, CheckCircle, IndianRupee } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const LabDashboard = () => {
@@ -22,7 +21,7 @@ const LabDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background">
       <div className="p-5 safe-top">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 page-enter">
@@ -30,10 +29,18 @@ const LabDashboard = () => {
             <p className="text-sm text-muted-foreground">Welcome back</p>
             <h1 className="text-2xl font-bold text-foreground">LifeCare Diagnostics</h1>
           </div>
-          <button className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow">
-            <Bell className="w-5 h-5 text-foreground" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow">
+              <Bell className="w-5 h-5 text-foreground" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
+            </button>
+            <button 
+              onClick={() => navigate("/lab/profile")}
+              className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
+            >
+              <User className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -84,8 +91,6 @@ const LabDashboard = () => {
           </div>
         </div>
       </div>
-
-      <BottomNav role="lab" />
     </div>
   );
 };

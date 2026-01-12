@@ -1,17 +1,17 @@
 import { GlassCard } from "@/components/ui/GlassCard";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { FileText, Upload, Users, Bell, Clock, CheckCircle } from "lucide-react";
+import { FileText, Users, Bell, Clock, CheckCircle, IndianRupee } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const LabDashboard = () => {
   const navigate = useNavigate();
 
   const stats = [
+    { label: "Today's Assigned Patients", value: "24", icon: Users, color: "text-primary" },
+    { label: "Earnings", value: "₹12,500", icon: IndianRupee, color: "text-[hsl(158_64%_45%)]" },
     { label: "Pending Reports", value: "12", icon: Clock, color: "text-[hsl(38_92%_50%)]" },
-    { label: "Uploaded Today", value: "8", icon: CheckCircle, color: "text-[hsl(158_64%_45%)]" },
-    { label: "Assigned Patients", value: "24", icon: Users, color: "text-primary" },
-    { label: "Total Reports", value: "156", icon: FileText, color: "text-secondary" },
+    { label: "Uploaded Reports", value: "156", icon: CheckCircle, color: "text-secondary" },
   ];
 
   const recentPatients = [

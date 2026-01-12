@@ -53,25 +53,6 @@ const LabDashboard = () => {
             );
           })}
         </div>
-
-        {/* Quick Actions */}
-        <div className="flex gap-3 mb-6 slide-up" style={{ animationDelay: "0.2s" }}>
-          <button
-            onClick={() => navigate("/lab/upload")}
-            className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-button hover:shadow-elevated transition-all flex items-center justify-center gap-2"
-          >
-            <Upload className="w-5 h-5" />
-            Upload Report
-          </button>
-          <button
-            onClick={() => navigate("/lab/reports")}
-            className="flex-1 py-3 px-4 rounded-xl bg-secondary text-secondary-foreground font-semibold shadow-card hover:shadow-elevated transition-all flex items-center justify-center gap-2"
-          >
-            <FileText className="w-5 h-5" />
-            View All
-          </button>
-        </div>
-
         {/* Recent Patients */}
         <div className="slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="flex items-center justify-between mb-4">

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +23,7 @@ const DoctorProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-8">
       <div className="p-5 safe-top">
         <PageHeader
           title="Profile"
@@ -136,8 +135,6 @@ const DoctorProfile = () => {
           </Button>
         </div>
       </div>
-
-      <BottomNav role="doctor" />
     </div>
   );
 };

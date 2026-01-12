@@ -1,5 +1,4 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Calendar, Clock, FileText, Users, Bell } from "lucide-react";
@@ -22,7 +21,7 @@ const DoctorDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-8">
       <div className="p-5 safe-top">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 page-enter">
@@ -108,8 +107,6 @@ const DoctorDashboard = () => {
           </div>
         </div>
       </div>
-
-      <BottomNav role="doctor" />
     </div>
   );
 };

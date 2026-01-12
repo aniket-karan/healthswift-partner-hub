@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +44,7 @@ const LabUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-8">
       <div className="p-5 safe-top">
         <PageHeader title="Upload Report" subtitle="Attach reports to patient profiles" showBack />
 
@@ -198,8 +197,6 @@ const LabUpload = () => {
           </div>
         )}
       </div>
-
-      <BottomNav role="lab" />
     </div>
   );
 };

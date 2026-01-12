@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { BottomNav } from "@/components/ui/BottomNav";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Input } from "@/components/ui/input";
@@ -38,7 +37,7 @@ const LabReports = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-8">
       <div className="p-5 safe-top">
         <PageHeader title="Reports" subtitle="View and manage all reports" showBack />
 
@@ -108,8 +107,6 @@ const LabReports = () => {
           </div>
         )}
       </div>
-
-      <BottomNav role="lab" />
     </div>
   );
 };

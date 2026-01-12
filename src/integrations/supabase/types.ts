@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          notes: string | null
+          patient_age: number | null
+          patient_email: string | null
+          patient_name: string
+          patient_phone: string | null
+          scheduled_at: string
+          status: string
+          symptoms: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          notes?: string | null
+          patient_age?: number | null
+          patient_email?: string | null
+          patient_name: string
+          patient_phone?: string | null
+          scheduled_at: string
+          status?: string
+          symptoms?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          notes?: string | null
+          patient_age?: number | null
+          patient_email?: string | null
+          patient_name?: string
+          patient_phone?: string | null
+          scheduled_at?: string
+          status?: string
+          symptoms?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lab_reports: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          id: string
+          lab_id: string
+          notes: string | null
+          patient_name: string
+          status: string
+          test_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          lab_id: string
+          notes?: string | null
+          patient_name: string
+          status?: string
+          test_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          lab_id?: string
+          notes?: string | null
+          patient_name?: string
+          status?: string
+          test_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          doctor_id: string
+          file_url: string | null
+          id: string
+          medications: Json | null
+          notes: string | null
+          patient_name: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          doctor_id: string
+          file_url?: string | null
+          id?: string
+          medications?: Json | null
+          notes?: string | null
+          patient_name: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          doctor_id?: string
+          file_url?: string | null
+          id?: string
+          medications?: Json | null
+          notes?: string | null
+          patient_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string | null
@@ -56,6 +181,39 @@ export type Database = {
           specialization?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      time_slots: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          end_time: string
+          id: string
+          is_available: boolean
+          slot_date: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          end_time: string
+          id?: string
+          is_available?: boolean
+          slot_date: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          end_time?: string
+          id?: string
+          is_available?: boolean
+          slot_date?: string
+          start_time?: string
+          updated_at?: string
         }
         Relationships: []
       }

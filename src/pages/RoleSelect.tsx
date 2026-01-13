@@ -83,12 +83,12 @@ const RoleSelect = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top safe-bottom">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 lg:p-10">
+      <div className="w-full max-w-sm lg:max-w-lg">
         {/* Header */}
         <div className="text-center mb-10 page-enter">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Continue as</h1>
-          <p className="text-muted-foreground">Select your role to proceed</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">Continue as</h1>
+          <p className="text-muted-foreground lg:text-lg">Select your role to proceed</p>
         </div>
 
         {/* Role Cards */}

@@ -43,20 +43,20 @@ const DoctorAppointments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader title="Appointments" subtitle="Manage your consultations" showBack />
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 page-enter">
+        <div className="flex gap-2 lg:gap-3 mb-6 lg:mb-8 page-enter">
           {(["pending", "completed"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              className={`flex-1 lg:flex-none lg:px-8 py-3 lg:py-4 rounded-xl font-semibold transition-all duration-300 lg:text-lg ${
                 activeTab === tab
                   ? "bg-primary text-primary-foreground shadow-button"
-                  : "bg-muted/50 text-muted-foreground"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -64,38 +64,38 @@ const DoctorAppointments = () => {
           ))}
         </div>
 
-        {/* Appointments List */}
-        <div className="space-y-4 stagger-children">
+        {/* Appointments Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 stagger-children">
           {filteredAppointments.map((apt) => (
-            <GlassCard key={apt.id} elevated className="p-4">
+            <GlassCard key={apt.id} elevated className="p-4 lg:p-6">
               <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <User className="w-6 h-6 lg:w-7 lg:h-7 text-primary" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-foreground">{apt.name}</h3>
+                    <h3 className="font-semibold text-foreground lg:text-lg">{apt.name}</h3>
                     <StatusBadge status={apt.status} />
                   </div>
-                  <p className="text-sm text-muted-foreground">Age: {apt.age} years</p>
+                  <p className="text-sm lg:text-base text-muted-foreground">Age: {apt.age} years</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                <Clock className="w-4 h-4" />
+              <div className="flex items-center gap-2 text-sm lg:text-base text-muted-foreground mb-4">
+                <Clock className="w-4 h-4 lg:w-5 lg:h-5" />
                 <span>{apt.time}</span>
               </div>
 
-              <div className="flex items-start gap-2 p-3 rounded-xl bg-muted/30 mb-4">
-                <AlertCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-foreground">{apt.symptoms}</p>
+              <div className="flex items-start gap-2 p-3 lg:p-4 rounded-xl bg-muted/30 mb-4">
+                <AlertCircle className="w-4 h-4 lg:w-5 lg:h-5 text-primary mt-0.5 flex-shrink-0" />
+                <p className="text-sm lg:text-base text-foreground">{apt.symptoms}</p>
               </div>
 
               {apt.status === "pending" && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 lg:gap-3">
                   <Button
                     size="sm"
-                    className="flex-1 rounded-xl shadow-button"
+                    className="flex-1 rounded-xl shadow-button lg:h-12 lg:text-base"
                     onClick={() => window.open("https://meet.google.com", "_blank")}
                   >
                     <Video className="w-4 h-4 mr-2" />
@@ -104,7 +104,7 @@ const DoctorAppointments = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1 rounded-xl"
+                    className="flex-1 rounded-xl lg:h-12 lg:text-base"
                     onClick={() => setShowUpload(apt.id)}
                   >
                     <FileUp className="w-4 h-4 mr-2" />
@@ -113,10 +113,10 @@ const DoctorAppointments = () => {
                   <Button
                     size="sm"
                     variant="secondary"
-                    className="rounded-xl"
+                    className="rounded-xl lg:h-12"
                     onClick={() => markCompleted(apt.id)}
                   >
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4 lg:w-5 lg:h-5" />
                   </Button>
                 </div>
               )}
@@ -125,19 +125,19 @@ const DoctorAppointments = () => {
         </div>
 
         {filteredAppointments.length === 0 && (
-          <div className="text-center py-12">
-            <CheckCircle className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">No {activeTab} appointments</p>
+          <div className="text-center py-12 lg:py-20">
+            <CheckCircle className="w-16 h-16 lg:w-20 lg:h-20 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground lg:text-lg">No {activeTab} appointments</p>
           </div>
         )}
       </div>
 
       {/* Upload Modal */}
       {showUpload !== null && (
-        <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 flex items-end justify-center">
-          <div className="w-full max-w-lg bg-card rounded-t-3xl p-6 animate-slide-in-bottom safe-bottom">
+        <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-card rounded-2xl lg:rounded-3xl p-6 lg:p-8 animate-scale-in shadow-elevated">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-foreground">Upload Prescription</h3>
+              <h3 className="text-lg lg:text-xl font-semibold text-foreground">Upload Prescription</h3>
               <button
                 onClick={() => setShowUpload(null)}
                 className="p-2 rounded-xl hover:bg-muted/50"
@@ -147,22 +147,22 @@ const DoctorAppointments = () => {
             </div>
 
             {uploadSuccess ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[hsl(158_64%_45%/0.15)] flex items-center justify-center">
-                  <Check className="w-8 h-8 text-[hsl(158_64%_35%)] success-check" />
+              <div className="text-center py-8 lg:py-12">
+                <div className="w-16 h-16 lg:w-20 lg:h-20 mx-auto mb-4 rounded-full bg-[hsl(158_64%_45%/0.15)] flex items-center justify-center">
+                  <Check className="w-8 h-8 lg:w-10 lg:h-10 text-[hsl(158_64%_35%)] success-check" />
                 </div>
-                <p className="font-semibold text-foreground">Prescription Uploaded</p>
-                <p className="text-sm text-muted-foreground">Attached to patient profile</p>
+                <p className="font-semibold text-foreground lg:text-lg">Prescription Uploaded</p>
+                <p className="text-sm lg:text-base text-muted-foreground">Attached to patient profile</p>
               </div>
             ) : (
               <>
-                <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center mb-4">
-                  <FileUp className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="font-medium text-foreground mb-1">Upload PDF or Image</p>
-                  <p className="text-sm text-muted-foreground">Max 10MB</p>
+                <div className="border-2 border-dashed border-border rounded-2xl p-8 lg:p-12 text-center mb-4">
+                  <FileUp className="w-10 h-10 lg:w-12 lg:h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="font-medium text-foreground mb-1 lg:text-lg">Upload PDF or Image</p>
+                  <p className="text-sm lg:text-base text-muted-foreground">Max 10MB</p>
                 </div>
                 <Button
-                  className="w-full h-14 rounded-xl text-base font-semibold shadow-button"
+                  className="w-full h-14 rounded-xl text-base lg:text-lg font-semibold shadow-button"
                   onClick={() => handleUpload(showUpload)}
                 >
                   Upload & Attach

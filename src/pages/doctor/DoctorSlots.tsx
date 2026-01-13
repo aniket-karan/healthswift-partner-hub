@@ -46,35 +46,35 @@ const DoctorSlots = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader title="Manage Slots" subtitle="Set your availability" showBack />
 
         {/* Calendar Strip */}
-        <GlassCard className="mb-6 page-enter">
+        <GlassCard className="mb-6 lg:mb-8 page-enter">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-foreground lg:text-lg">
               {selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </span>
           </div>
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+          <div className="flex gap-2 lg:gap-3 overflow-x-auto scrollbar-hide pb-2">
             {dates.map((date) => {
               const isSelected = date.toDateString() === selectedDate.toDateString();
               return (
                 <button
                   key={date.toISOString()}
                   onClick={() => setSelectedDate(date)}
-                  className={`flex-shrink-0 w-14 py-3 rounded-xl text-center transition-all duration-300 ${
+                  className={`flex-shrink-0 w-14 lg:w-20 py-3 lg:py-4 rounded-xl text-center transition-all duration-300 ${
                     isSelected
                       ? "bg-primary text-primary-foreground shadow-button"
                       : "bg-muted/50 text-foreground hover:bg-muted"
                   }`}
                 >
-                  <p className="text-xs font-medium opacity-70">
+                  <p className="text-xs lg:text-sm font-medium opacity-70">
                     {date.toLocaleDateString("en-US", { weekday: "short" })}
                   </p>
-                  <p className="text-lg font-bold">{date.getDate()}</p>
+                  <p className="text-lg lg:text-xl font-bold">{date.getDate()}</p>
                 </button>
               );
             })}
@@ -82,17 +82,17 @@ const DoctorSlots = () => {
         </GlassCard>
 
         {/* Time Slots */}
-        <div className="mb-6 slide-up">
+        <div className="mb-6 lg:mb-8 slide-up">
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold text-foreground">Time Slots</h2>
+            <h2 className="font-semibold text-foreground lg:text-lg">Time Slots</h2>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
             {slots.map((slot, index) => (
               <button
                 key={slot.time}
                 onClick={() => toggleSlot(index)}
-                className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                className={`p-4 lg:p-5 rounded-xl border-2 transition-all duration-300 ${
                   slot.status === "available"
                     ? "border-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%/0.1)]"
                     : "border-border bg-muted/30"
@@ -100,7 +100,7 @@ const DoctorSlots = () => {
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`font-semibold ${
+                    className={`font-semibold lg:text-lg ${
                       slot.status === "available" ? "text-[hsl(158_64%_35%)]" : "text-muted-foreground"
                     }`}
                   >
@@ -114,9 +114,9 @@ const DoctorSlots = () => {
         </div>
 
         {/* Add Custom Slot */}
-        <GlassCard className="mb-6">
-          <button className="w-full flex items-center justify-center gap-2 py-2 text-primary font-semibold">
-            <Plus className="w-5 h-5" />
+        <GlassCard className="mb-6 lg:mb-8">
+          <button className="w-full flex items-center justify-center gap-2 py-2 lg:py-3 text-primary font-semibold lg:text-lg">
+            <Plus className="w-5 h-5 lg:w-6 lg:h-6" />
             Add Custom Time Slot
           </button>
         </GlassCard>
@@ -124,7 +124,7 @@ const DoctorSlots = () => {
         {/* Save Button */}
         <Button
           onClick={handleSave}
-          className="w-full h-14 rounded-xl text-base font-semibold shadow-button"
+          className="w-full h-14 rounded-xl text-base lg:text-lg font-semibold shadow-button"
           disabled={showSuccess}
         >
           {showSuccess ? (

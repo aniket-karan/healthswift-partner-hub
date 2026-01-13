@@ -44,22 +44,22 @@ const LabUpload = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader title="Upload Report" subtitle="Attach reports to patient profiles" showBack />
 
         {showSuccess ? (
-          <div className="flex flex-col items-center justify-center py-20 scale-in">
-            <div className="w-24 h-24 mb-6 rounded-full bg-[hsl(158_64%_45%/0.15)] flex items-center justify-center">
-              <Check className="w-12 h-12 text-[hsl(158_64%_35%)] success-check" />
+          <div className="flex flex-col items-center justify-center py-20 lg:py-32 scale-in">
+            <div className="w-24 h-24 lg:w-32 lg:h-32 mb-6 rounded-full bg-[hsl(158_64%_45%/0.15)] flex items-center justify-center">
+              <Check className="w-12 h-12 lg:w-16 lg:h-16 text-[hsl(158_64%_35%)] success-check" />
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">Report Uploaded</h2>
-            <p className="text-muted-foreground text-center">
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">Report Uploaded</h2>
+            <p className="text-muted-foreground text-center lg:text-lg">
               Successfully attached to patient profile
             </p>
           </div>
         ) : (
-          <div className="space-y-6 stagger-children">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 stagger-children">
             {/* Patient Search */}
             <GlassCard elevated>
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -186,14 +186,16 @@ const LabUpload = () => {
             </GlassCard>
 
             {/* Submit Button */}
-            <Button
-              onClick={handleUpload}
-              disabled={!selectedPatient || !testName || !uploadedFile}
-              className="w-full h-14 rounded-xl text-base font-semibold shadow-button"
-            >
-              <Upload className="w-5 h-5 mr-2" />
-              Upload Report
-            </Button>
+            <div className="lg:col-span-2">
+              <Button
+                onClick={handleUpload}
+                disabled={!selectedPatient || !testName || !uploadedFile}
+                className="w-full h-14 rounded-xl text-base font-semibold shadow-button"
+              >
+                <Upload className="w-5 h-5 mr-2" />
+                Upload Report
+              </Button>
+            </div>
           </div>
         )}
       </div>

@@ -22,67 +22,67 @@ const LabDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-5 safe-top">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 page-enter">
+        <div className="flex items-center justify-between mb-8 page-enter">
           <div>
-            <p className="text-sm text-muted-foreground">Welcome back</p>
-            <h1 className="text-2xl font-bold text-foreground">LifeCare Diagnostics</h1>
+            <p className="text-sm lg:text-base text-muted-foreground">Welcome back</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">LifeCare Diagnostics</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:gap-3">
             <button className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow">
-              <Bell className="w-5 h-5 text-foreground" />
+              <Bell className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
             </button>
             <button 
               onClick={() => navigate("/lab/profile")}
               className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
             >
-              <User className="w-5 h-5 text-foreground" />
+              <User className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
             </button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6 stagger-children">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-8 stagger-children">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
-              <GlassCard key={stat.label} className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className={`p-2 rounded-xl bg-muted/50 ${stat.color}`}>
-                    <Icon className="w-5 h-5" />
+              <GlassCard key={stat.label} className="p-4 lg:p-6">
+                <div className="flex items-start justify-between mb-2 lg:mb-3">
+                  <div className={`p-2 lg:p-3 rounded-xl bg-muted/50 ${stat.color}`}>
+                    <Icon className="w-5 h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <span className="text-2xl font-bold text-foreground">{stat.value}</span>
+                  <span className="text-2xl lg:text-3xl font-bold text-foreground">{stat.value}</span>
                 </div>
-                <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
+                <p className="text-xs lg:text-sm text-muted-foreground font-medium">{stat.label}</p>
               </GlassCard>
             );
           })}
         </div>
         {/* Recent Patients */}
         <div className="slide-up" style={{ animationDelay: "0.3s" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Patients</h2>
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
+            <h2 className="text-lg lg:text-xl font-semibold text-foreground">Recent Patients</h2>
             <button
               onClick={() => navigate("/lab/reports")}
-              className="text-sm text-primary font-medium"
+              className="text-sm lg:text-base text-primary font-medium hover:underline"
             >
               See all
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
             {recentPatients.map((patient) => (
               <GlassCard
                 key={patient.id}
                 onClick={() => navigate("/lab/upload")}
-                className="p-4"
+                className="p-4 lg:p-5"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-foreground">{patient.name}</h3>
-                    <p className="text-sm text-muted-foreground">{patient.test}</p>
+                    <h3 className="font-semibold text-foreground lg:text-lg">{patient.name}</h3>
+                    <p className="text-sm lg:text-base text-muted-foreground">{patient.test}</p>
                   </div>
                   <StatusBadge status={patient.status} />
                 </div>

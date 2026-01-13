@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Stethoscope, FlaskConical, ArrowRight, Loader2 } from "lucide-react";
+import { Stethoscope, FlaskConical, ArrowRight, Loader2, Activity, HeartPulse } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,11 +25,15 @@ const RoleSelect = () => {
         navigate("/doctor", { replace: true });
       } else if (role === "diagnostic_center") {
         navigate("/lab", { replace: true });
+      } else if (role === "physiotherapist") {
+        navigate("/physio", { replace: true });
+      } else if (role === "ecg_lab") {
+        navigate("/ecg", { replace: true });
       }
     }
   }, [authLoading, role, navigate]);
 
-  const handleRoleSelect = async (roleId: "doctor" | "diagnostic_center", path: string) => {
+  const handleRoleSelect = async (roleId: "doctor" | "diagnostic_center" | "physiotherapist" | "ecg_lab", path: string) => {
     setIsSettingRole(roleId);
     
     const { error } = await setUserRole(roleId);
@@ -71,6 +75,22 @@ const RoleSelect = () => {
       icon: FlaskConical,
       path: "/lab",
       gradient: "from-secondary to-[hsl(220_60%_35%)]",
+    },
+    {
+      id: "physiotherapist" as const,
+      title: "Physiotherapist",
+      description: "Manage therapy sessions & patient progress",
+      icon: Activity,
+      path: "/physio",
+      gradient: "from-[hsl(280_60%_50%)] to-[hsl(300_60%_40%)]",
+    },
+    {
+      id: "ecg_lab" as const,
+      title: "ECG Lab",
+      description: "Upload ECG reports & manage cardiac tests",
+      icon: HeartPulse,
+      path: "/ecg",
+      gradient: "from-[hsl(0_70%_50%)] to-[hsl(20_70%_45%)]",
     },
   ];
 

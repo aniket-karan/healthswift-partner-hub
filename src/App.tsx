@@ -22,6 +22,14 @@ import LabReports from "./pages/lab/LabReports";
 import LabUpload from "./pages/lab/LabUpload";
 import LabProfile from "./pages/lab/LabProfile";
 
+// Physio Pages
+import PhysioDashboard from "./pages/physio/PhysioDashboard";
+import PhysioProfile from "./pages/physio/PhysioProfile";
+
+// ECG Lab Pages
+import EcgDashboard from "./pages/ecg/EcgDashboard";
+import EcgProfile from "./pages/ecg/EcgProfile";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -46,6 +54,15 @@ const App = () => (
             <Route path="/lab" element={<LabDashboard />} />
             <Route path="/lab/reports" element={<LabReports />} />
             <Route path="/lab/upload" element={<LabUpload />} />
+            <Route path="/lab/profile" element={<LabProfile />} />
+
+            {/* Physio Routes */}
+            <Route path="/physio" element={<PhysioDashboard />} />
+            <Route path="/physio/profile" element={<PhysioProfile />} />
+
+            {/* ECG Lab Routes */}
+            <Route path="/ecg" element={<EcgDashboard />} />
+            <Route path="/ecg/profile" element={<EcgProfile />} />
             <Route path="/lab/profile" element={<LabProfile />} />
 
             {/* Catch-all */}

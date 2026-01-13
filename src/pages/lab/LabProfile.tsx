@@ -83,8 +83,8 @@ const LabProfile = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader
           title="Profile"
           showBack
@@ -99,25 +99,25 @@ const LabProfile = () => {
         />
 
         {/* Profile Header */}
-        <div className="text-center mb-6 page-enter">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center shadow-elevated">
-            <FlaskConical className="w-12 h-12 text-primary-foreground" />
+        <div className="text-center mb-8 page-enter">
+          <div className="w-24 h-24 lg:w-32 lg:h-32 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center shadow-elevated">
+            <FlaskConical className="w-12 h-12 lg:w-16 lg:h-16 text-primary-foreground" />
           </div>
           {isEditing ? (
             <Input
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="text-center text-xl font-bold ios-input mb-2"
+              className="text-center text-xl lg:text-2xl font-bold ios-input mb-2 max-w-md mx-auto"
             />
           ) : (
-            <h2 className="text-xl font-bold text-foreground mb-1">{profile.name}</h2>
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-1">{profile.name}</h2>
           )}
-          <p className="text-muted-foreground">Diagnostic Center</p>
-          <p className="text-xs text-primary mt-1">{profile.nabl}</p>
+          <p className="text-muted-foreground lg:text-lg">Diagnostic Center</p>
+          <p className="text-xs lg:text-sm text-primary mt-1">{profile.nabl}</p>
         </div>
 
-        {/* Profile Details */}
-        <div className="space-y-4 slide-up">
+        {/* Profile Details - Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 slide-up">
           {/* Basic Information */}
           <GlassCard elevated>
             <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -208,14 +208,16 @@ const LabProfile = () => {
           </GlassCard>
 
           {/* Logout Button */}
-          <Button
-            variant="outline"
-            className="w-full h-14 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5 mr-2" />
-            Sign Out
-          </Button>
+          <div className="lg:col-span-2">
+            <Button
+              variant="outline"
+              className="w-full h-14 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
     </div>

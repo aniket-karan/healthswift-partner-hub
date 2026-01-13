@@ -23,8 +23,8 @@ const DoctorProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader
           title="Profile"
           action={
@@ -39,19 +39,19 @@ const DoctorProfile = () => {
 
         {/* Profile Header */}
         <div className="text-center mb-8 page-enter">
-          <div className="w-24 h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-elevated">
-            <User className="w-12 h-12 text-primary-foreground" />
+          <div className="w-24 h-24 lg:w-32 lg:h-32 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-elevated">
+            <User className="w-12 h-12 lg:w-16 lg:h-16 text-primary-foreground" />
           </div>
           {isEditing ? (
             <Input
               value={profile.name}
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="text-center text-xl font-bold ios-input mb-2"
+              className="text-center text-xl lg:text-2xl font-bold ios-input mb-2 max-w-md mx-auto"
             />
           ) : (
-            <h2 className="text-xl font-bold text-foreground mb-1">{profile.name}</h2>
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-1">{profile.name}</h2>
           )}
-          <p className="text-muted-foreground">{profile.specialty}</p>
+          <p className="text-muted-foreground lg:text-lg">{profile.specialty}</p>
         </div>
 
         {/* Profile Details */}

@@ -99,18 +99,18 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 safe-top safe-bottom">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 lg:p-10">
       {/* Logo Section */}
       <div className="text-center mb-10 page-enter">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-button">
-          <ShieldCheck className="w-10 h-10 text-primary-foreground" />
+        <div className="w-20 h-20 lg:w-24 lg:h-24 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-button">
+          <ShieldCheck className="w-10 h-10 lg:w-12 lg:h-12 text-primary-foreground" />
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-1">HealthSwift</h1>
-        <p className="text-muted-foreground font-medium">Partner Portal</p>
+        <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-1">HealthSwift</h1>
+        <p className="text-muted-foreground font-medium lg:text-lg">Partner Portal</p>
       </div>
 
       {/* Login Card */}
-      <GlassCard elevated className="w-full max-w-sm slide-up">
+      <GlassCard elevated className="w-full max-w-sm lg:max-w-md slide-up">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="text-center">
             <h2 className="text-lg font-semibold text-foreground">

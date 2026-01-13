@@ -37,40 +37,43 @@ const LabReports = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="p-5 safe-top">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         <PageHeader title="Reports" subtitle="View and manage all reports" showBack />
 
-        {/* Search */}
-        <div className="relative mb-4 page-enter">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search patient or test..."
-            className="ios-input pl-12 h-12"
-          />
+        {/* Search and Tabs Row */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 page-enter">
+          {/* Search */}
+          <div className="relative flex-1 lg:max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search patient or test..."
+              className="ios-input pl-12 h-12"
+            />
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2">
+            {(["all", "pending", "uploaded"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                  activeTab === tab
+                    ? "bg-primary text-primary-foreground shadow-button"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 page-enter" style={{ animationDelay: "0.1s" }}>
-          {(["all", "pending", "uploaded"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                activeTab === tab
-                  ? "bg-primary text-primary-foreground shadow-button"
-                  : "bg-muted/50 text-muted-foreground"
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Reports List */}
-        <div className="space-y-3 stagger-children">
+        {/* Reports Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger-children">
           {filteredReports.map((report) => (
             <GlassCard
               key={report.id}
@@ -101,9 +104,9 @@ const LabReports = () => {
         </div>
 
         {filteredReports.length === 0 && (
-          <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">No reports found</p>
+          <div className="text-center py-12 lg:py-20">
+            <FileText className="w-16 h-16 lg:w-20 lg:h-20 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground lg:text-lg">No reports found</p>
           </div>
         )}
       </div>

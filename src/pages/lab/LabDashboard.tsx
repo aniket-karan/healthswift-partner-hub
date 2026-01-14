@@ -1,11 +1,13 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Check, X, Droplets, Upload, CreditCard, Banknote } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Check, X, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 type OrderStatus = "pending" | "accepted" | "declined";
 type PaymentMode = "cash" | "online" | null;
+type TimeFilter = "daily" | "weekly" | "monthly" | "yearly";
 
 interface AssignedPatient {
   id: number;
@@ -16,14 +18,59 @@ interface AssignedPatient {
   paymentMode: PaymentMode;
 }
 
+// Sample data for different time filters
+const patientChartData = {
+  daily: [
+    { name: "9 AM", patients: 4 },
+    { name: "10 AM", patients: 6 },
+    { name: "11 AM", patients: 8 },
+    { name: "12 PM", patients: 5 },
+    { name: "1 PM", patients: 3 },
+    { name: "2 PM", patients: 7 },
+    { name: "3 PM", patients: 9 },
+    { name: "4 PM", patients: 6 },
+  ],
+  weekly: [
+    { name: "Mon", patients: 24 },
+    { name: "Tue", patients: 32 },
+    { name: "Wed", patients: 28 },
+    { name: "Thu", patients: 35 },
+    { name: "Fri", patients: 30 },
+    { name: "Sat", patients: 18 },
+    { name: "Sun", patients: 12 },
+  ],
+  monthly: [
+    { name: "Week 1", patients: 120 },
+    { name: "Week 2", patients: 145 },
+    { name: "Week 3", patients: 132 },
+    { name: "Week 4", patients: 158 },
+  ],
+  yearly: [
+    { name: "Jan", patients: 450 },
+    { name: "Feb", patients: 480 },
+    { name: "Mar", patients: 520 },
+    { name: "Apr", patients: 490 },
+    { name: "May", patients: 560 },
+    { name: "Jun", patients: 530 },
+    { name: "Jul", patients: 580 },
+    { name: "Aug", patients: 620 },
+    { name: "Sep", patients: 590 },
+    { name: "Oct", patients: 610 },
+    { name: "Nov", patients: 640 },
+    { name: "Dec", patients: 680 },
+  ],
+};
+
 const LabDashboard = () => {
   const navigate = useNavigate();
+  const [isGraphExpanded, setIsGraphExpanded] = useState(false);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("daily");
 
   const stats = [
-    { label: "Today's Assigned Patients", value: "24", icon: Users, color: "text-primary" },
-    { label: "Earnings", value: "₹12,500", icon: IndianRupee, color: "text-[hsl(158_64%_45%)]" },
-    { label: "Pending Reports", value: "12", icon: Clock, color: "text-[hsl(38_92%_50%)]" },
-    { label: "Uploaded Reports", value: "156", icon: CheckCircle, color: "text-secondary" },
+    { label: "Today's Assigned Patients", value: "24", icon: Users, color: "text-primary", expandable: true },
+    { label: "Earnings", value: "₹12,500", icon: IndianRupee, color: "text-[hsl(158_64%_45%)]", expandable: false },
+    { label: "Pending Reports", value: "12", icon: Clock, color: "text-[hsl(38_92%_50%)]", expandable: false },
+    { label: "Uploaded Reports", value: "156", icon: CheckCircle, color: "text-secondary", expandable: false },
   ];
 
   const [assignedPatients, setAssignedPatients] = useState<AssignedPatient[]>([
@@ -48,6 +95,13 @@ const LabDashboard = () => {
   const setPaymentMode = (id: number, mode: "cash" | "online") => {
     setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, paymentMode: mode } : p));
   };
+
+  const timeFilters: { key: TimeFilter; label: string }[] = [
+    { key: "daily", label: "Daily" },
+    { key: "weekly", label: "Weekly" },
+    { key: "monthly", label: "Monthly" },
+    { key: "yearly", label: "Yearly" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,13 +136,88 @@ const LabDashboard = () => {
                   <div className={`p-2 lg:p-3 rounded-xl bg-muted/50 ${stat.color}`}>
                     <Icon className="w-5 h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <span className="text-2xl lg:text-3xl font-bold text-foreground">{stat.value}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl lg:text-3xl font-bold text-foreground">{stat.value}</span>
+                    {stat.expandable && (
+                      <button
+                        onClick={() => setIsGraphExpanded(!isGraphExpanded)}
+                        className="p-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        {isGraphExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-foreground" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-foreground" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs lg:text-sm text-muted-foreground font-medium">{stat.label}</p>
               </GlassCard>
             );
           })}
         </div>
+
+        {/* Expandable Patient Graph */}
+        {isGraphExpanded && (
+          <div className="mb-8 slide-up">
+            <GlassCard className="p-4 lg:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-lg font-semibold text-foreground">Patient Statistics</h3>
+                <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-lg">
+                  {timeFilters.map((filter) => (
+                    <Button
+                      key={filter.key}
+                      variant={timeFilter === filter.key ? "default" : "ghost"}
+                      size="sm"
+                      className="h-8 px-3"
+                      onClick={() => setTimeFilter(filter.key)}
+                    >
+                      {filter.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="h-64 lg:h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={patientChartData[timeFilter]}>
+                    <defs>
+                      <linearGradient id="patientGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: "hsl(var(--card))", 
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        color: "hsl(var(--foreground))"
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="patients" 
+                      stroke="hsl(var(--primary))" 
+                      strokeWidth={2}
+                      fill="url(#patientGradient)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </GlassCard>
+          </div>
+        )}
         {/* Today's Assigned Patients */}
         <div className="slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="flex items-center justify-between mb-4 lg:mb-6">

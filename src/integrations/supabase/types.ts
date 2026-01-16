@@ -95,6 +95,48 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_tests: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lab_id: string
+          offer_price: number | null
+          price: number
+          test_name: string
+          turnaround_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lab_id: string
+          offer_price?: number | null
+          price: number
+          test_name: string
+          turnaround_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lab_id?: string
+          offer_price?: number | null
+          price?: number
+          test_name?: string
+          turnaround_time?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prescriptions: {
         Row: {
           appointment_id: string | null
@@ -184,6 +226,59 @@ export type Database = {
         }
         Relationships: []
       }
+      test_bookings: {
+        Row: {
+          amount_paid: number
+          booking_date: string
+          created_at: string
+          id: string
+          lab_id: string
+          notes: string | null
+          patient_email: string | null
+          patient_name: string
+          patient_phone: string | null
+          status: string
+          test_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid: number
+          booking_date?: string
+          created_at?: string
+          id?: string
+          lab_id: string
+          notes?: string | null
+          patient_email?: string | null
+          patient_name: string
+          patient_phone?: string | null
+          status?: string
+          test_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          booking_date?: string
+          created_at?: string
+          id?: string
+          lab_id?: string
+          notes?: string | null
+          patient_email?: string | null
+          patient_name?: string
+          patient_phone?: string | null
+          status?: string
+          test_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_bookings_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "lab_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_slots: {
         Row: {
           created_at: string
@@ -214,6 +309,39 @@ export type Database = {
           slot_date?: string
           start_time?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          reference_id: string | null
+          type: string
+          user_id: string
+          user_role: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          reference_id?: string | null
+          type: string
+          user_id: string
+          user_role: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          type?: string
+          user_id?: string
+          user_role?: string
         }
         Relationships: []
       }

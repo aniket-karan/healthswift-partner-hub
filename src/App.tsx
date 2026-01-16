@@ -21,6 +21,8 @@ import LabDashboard from "./pages/lab/LabDashboard";
 import LabReports from "./pages/lab/LabReports";
 import LabUpload from "./pages/lab/LabUpload";
 import LabProfile from "./pages/lab/LabProfile";
+import LabTests from "./pages/lab/LabTests";
+import LabBookings from "./pages/lab/LabBookings";
 
 // Physio Pages
 import PhysioDashboard from "./pages/physio/PhysioDashboard";
@@ -54,6 +56,8 @@ const App = () => (
             <Route path="/lab" element={<LabDashboard />} />
             <Route path="/lab/reports" element={<LabReports />} />
             <Route path="/lab/upload" element={<LabUpload />} />
+            <Route path="/lab/tests" element={<LabTests />} />
+            <Route path="/lab/bookings" element={<LabBookings />} />
             <Route path="/lab/profile" element={<LabProfile />} />
 
             {/* Physio Routes */}

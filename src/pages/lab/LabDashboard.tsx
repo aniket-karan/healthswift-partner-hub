@@ -1,5 +1,5 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Check, X, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Check, X, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
@@ -199,6 +199,13 @@ const LabDashboard = () => {
             <h1 className="text-2xl lg:text-3xl font-bold text-foreground">LifeCare Diagnostics</h1>
           </div>
           <div className="flex items-center gap-2 lg:gap-3">
+            <button 
+              onClick={() => navigate("/lab/tests")}
+              className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
+              title="Manage Tests"
+            >
+              <FlaskConical className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
+            </button>
             <button className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow">
               <Bell className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />

@@ -24,7 +24,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener BEFORE checking session
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setRole(data?.role as AppRole | null);
+            setIsLoading(false);
+          });
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
@@ -36,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id)
-            .single();
+            .maybeSingle();
           
           setRole(data?.role as AppRole | null);
         } else {
@@ -47,25 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            setRole(data?.role as AppRole | null);
-            setIsLoading(false);
-          });
-      } else {
-        setIsLoading(false);
-      }
-    });
 
     return () => subscription.unsubscribe();
   }, []);

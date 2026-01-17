@@ -67,7 +67,6 @@ const App = () => (
             {/* ECG Lab Routes */}
             <Route path="/ecg" element={<EcgDashboard />} />
             <Route path="/ecg/profile" element={<EcgProfile />} />
-            <Route path="/lab/profile" element={<LabProfile />} />
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

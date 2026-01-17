@@ -7,6 +7,8 @@ import { Mail, Lock, ArrowRight, ShieldCheck, UserPlus, LogIn } from "lucide-rea
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
+import { useEffect } from "react";
+
 const Login = () => {
   const navigate = useNavigate();
   const { signIn, signUp, user, role, isLoading: authLoading } = useAuth();
@@ -18,15 +20,21 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already logged in
-  if (!authLoading && user) {
-    if (role === "doctor") {
-      navigate("/doctor", { replace: true });
-    } else if (role === "diagnostic_center") {
-      navigate("/lab", { replace: true });
-    } else {
-      navigate("/role-select", { replace: true });
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (role === "doctor") {
+        navigate("/doctor", { replace: true });
+      } else if (role === "diagnostic_center") {
+        navigate("/lab", { replace: true });
+      } else if (role === "physiotherapist") {
+        navigate("/physio", { replace: true });
+      } else if (role === "ecg_lab") {
+        navigate("/ecg", { replace: true });
+      } else {
+        navigate("/role-select", { replace: true });
+      }
     }
-  }
+  }, [authLoading, user, role, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

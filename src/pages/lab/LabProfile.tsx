@@ -42,7 +42,7 @@ const LabProfile = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   const ProfileField = ({ 

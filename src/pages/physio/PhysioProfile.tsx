@@ -55,7 +55,7 @@ const PhysioProfile = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleInputChange = (field: string, value: string) => {

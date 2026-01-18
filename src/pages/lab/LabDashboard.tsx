@@ -1,12 +1,21 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Check, X, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-type OrderStatus = "pending" | "accepted" | "declined";
-type PaymentMode = "cash" | "online" | null;
+type PaymentStatus = "unpaid" | "paid_online" | "paid_cash";
 type TimeFilter = "daily" | "weekly" | "monthly" | "yearly";
 type TransactionType = "credit" | "debit";
 
@@ -23,9 +32,8 @@ interface AssignedPatient {
   id: number;
   name: string;
   test: string;
-  orderStatus: OrderStatus;
   collectionComplete: boolean;
-  paymentMode: PaymentMode;
+  paymentStatus: PaymentStatus;
 }
 
 // Sample data for different time filters - Patient stats
@@ -150,26 +158,36 @@ const LabDashboard = () => {
   ];
 
   const [assignedPatients, setAssignedPatients] = useState<AssignedPatient[]>([
-    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", orderStatus: "pending", collectionComplete: false, paymentMode: null },
-    { id: 2, name: "Meera Gupta", test: "Lipid Profile", orderStatus: "accepted", collectionComplete: true, paymentMode: "online" },
-    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", orderStatus: "pending", collectionComplete: false, paymentMode: null },
-    { id: 4, name: "Anjali Sharma", test: "HbA1c", orderStatus: "accepted", collectionComplete: false, paymentMode: "cash" },
+    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", collectionComplete: false, paymentStatus: "unpaid" },
+    { id: 2, name: "Meera Gupta", test: "Lipid Profile", collectionComplete: true, paymentStatus: "paid_online" },
+    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", collectionComplete: false, paymentStatus: "unpaid" },
+    { id: 4, name: "Anjali Sharma", test: "HbA1c", collectionComplete: false, paymentStatus: "paid_cash" },
   ]);
 
-  const handleAccept = (id: number) => {
-    setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, orderStatus: "accepted" as const } : p));
-  };
-
-  const handleDecline = (id: number) => {
-    setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, orderStatus: "declined" as const } : p));
-  };
+  const [cashPaymentDialog, setCashPaymentDialog] = useState<{ open: boolean; patientId: number | null }>({
+    open: false,
+    patientId: null,
+  });
 
   const toggleCollection = (id: number) => {
     setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, collectionComplete: !p.collectionComplete } : p));
   };
 
-  const setPaymentMode = (id: number, mode: "cash" | "online") => {
-    setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, paymentMode: mode } : p));
+  const handleUnpaidClick = (id: number) => {
+    setCashPaymentDialog({ open: true, patientId: id });
+  };
+
+  const handleCashPaymentConfirm = () => {
+    if (cashPaymentDialog.patientId) {
+      setAssignedPatients(prev => prev.map(p => 
+        p.id === cashPaymentDialog.patientId ? { ...p, paymentStatus: "paid_cash" as const } : p
+      ));
+    }
+    setCashPaymentDialog({ open: false, patientId: null });
+  };
+
+  const handleCashPaymentCancel = () => {
+    setCashPaymentDialog({ open: false, patientId: null });
   };
 
   const handleStatClick = (expandKey: string | null) => {
@@ -451,39 +469,7 @@ const LabDashboard = () => {
                       <span className="sm:hidden">Rx</span>
                     </Button>
 
-                    {/* 2. Accept/Decline Order */}
-                    {patient.orderStatus === "pending" ? (
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleAccept(patient.id)}
-                        >
-                          <Check className="w-4 h-4" />
-                          <span className="hidden sm:inline">Accept</span>
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="gap-1"
-                          onClick={() => handleDecline(patient.id)}
-                        >
-                          <X className="w-4 h-4" />
-                          <span className="hidden sm:inline">Decline</span>
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className={`text-sm font-medium px-2 py-1 rounded ${
-                        patient.orderStatus === "accepted" 
-                          ? "bg-primary/10 text-primary" 
-                          : "bg-destructive/10 text-destructive"
-                      }`}>
-                        {patient.orderStatus === "accepted" ? "Accepted" : "Declined"}
-                      </span>
-                    )}
-
-                    {/* 3. Blood Collection + Upload */}
+                    {/* 2. Blood Collection + Upload */}
                     <div className="flex items-center gap-1">
                       <Button
                         variant={patient.collectionComplete ? "default" : "outline"}
@@ -505,26 +491,32 @@ const LabDashboard = () => {
                       </Button>
                     </div>
 
-                    {/* 4. Payment Mode */}
+                    {/* 3. Payment Status */}
                     <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-                      <Button
-                        variant={patient.paymentMode === "cash" ? "default" : "ghost"}
-                        size="sm"
-                        className="gap-1 h-7"
-                        onClick={() => setPaymentMode(patient.id, "cash")}
-                      >
-                        <Banknote className="w-4 h-4" />
-                        <span className="hidden sm:inline">Cash</span>
-                      </Button>
-                      <Button
-                        variant={patient.paymentMode === "online" ? "default" : "ghost"}
-                        size="sm"
-                        className="gap-1 h-7"
-                        onClick={() => setPaymentMode(patient.id, "online")}
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        <span className="hidden sm:inline">Online</span>
-                      </Button>
+                      {patient.paymentStatus === "paid_online" ? (
+                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                          <CreditCard className="w-4 h-4" />
+                          <span className="hidden sm:inline">Paid Online</span>
+                          <span className="sm:hidden">Paid</span>
+                        </span>
+                      ) : patient.paymentStatus === "paid_cash" ? (
+                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                          <Banknote className="w-4 h-4" />
+                          <span className="hidden sm:inline">Paid Cash</span>
+                          <span className="sm:hidden">Paid</span>
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="gap-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleUnpaidClick(patient.id)}
+                        >
+                          <Banknote className="w-4 h-4" />
+                          <span className="hidden sm:inline">Unpaid</span>
+                          <span className="sm:hidden">Unpaid</span>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -533,6 +525,28 @@ const LabDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Cash Payment Confirmation Dialog */}
+      <AlertDialog open={cashPaymentDialog.open} onOpenChange={(open) => {
+        if (!open) handleCashPaymentCancel();
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cash Payment Confirmation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Has the patient paid the amount in cash? Please confirm to mark this payment as complete.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCashPaymentCancel}>
+              Payment Not Received
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleCashPaymentConfirm}>
+              Payment Received Successfully
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

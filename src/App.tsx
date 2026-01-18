@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 // Pages
 import Login from "./pages/Login";
@@ -44,29 +45,29 @@ const App = () => (
           <Routes>
             {/* Auth Routes */}
             <Route path="/" element={<Login />} />
-            <Route path="/role-select" element={<RoleSelect />} />
+            <Route path="/role-select" element={<ProtectedRoute><RoleSelect /></ProtectedRoute>} />
 
             {/* Doctor Routes */}
-            <Route path="/doctor" element={<DoctorDashboard />} />
-            <Route path="/doctor/slots" element={<DoctorSlots />} />
-            <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-            <Route path="/doctor/profile" element={<DoctorProfile />} />
+            <Route path="/doctor" element={<ProtectedRoute requiredRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
+            <Route path="/doctor/slots" element={<ProtectedRoute requiredRole="doctor"><DoctorSlots /></ProtectedRoute>} />
+            <Route path="/doctor/appointments" element={<ProtectedRoute requiredRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
+            <Route path="/doctor/profile" element={<ProtectedRoute requiredRole="doctor"><DoctorProfile /></ProtectedRoute>} />
 
             {/* Lab Routes */}
-            <Route path="/lab" element={<LabDashboard />} />
-            <Route path="/lab/reports" element={<LabReports />} />
-            <Route path="/lab/upload" element={<LabUpload />} />
-            <Route path="/lab/tests" element={<LabTests />} />
-            <Route path="/lab/bookings" element={<LabBookings />} />
-            <Route path="/lab/profile" element={<LabProfile />} />
+            <Route path="/lab" element={<ProtectedRoute requiredRole="diagnostic_center"><LabDashboard /></ProtectedRoute>} />
+            <Route path="/lab/reports" element={<ProtectedRoute requiredRole="diagnostic_center"><LabReports /></ProtectedRoute>} />
+            <Route path="/lab/upload" element={<ProtectedRoute requiredRole="diagnostic_center"><LabUpload /></ProtectedRoute>} />
+            <Route path="/lab/tests" element={<ProtectedRoute requiredRole="diagnostic_center"><LabTests /></ProtectedRoute>} />
+            <Route path="/lab/bookings" element={<ProtectedRoute requiredRole="diagnostic_center"><LabBookings /></ProtectedRoute>} />
+            <Route path="/lab/profile" element={<ProtectedRoute requiredRole="diagnostic_center"><LabProfile /></ProtectedRoute>} />
 
             {/* Physio Routes */}
-            <Route path="/physio" element={<PhysioDashboard />} />
-            <Route path="/physio/profile" element={<PhysioProfile />} />
+            <Route path="/physio" element={<ProtectedRoute requiredRole="physiotherapist"><PhysioDashboard /></ProtectedRoute>} />
+            <Route path="/physio/profile" element={<ProtectedRoute requiredRole="physiotherapist"><PhysioProfile /></ProtectedRoute>} />
 
             {/* ECG Lab Routes */}
-            <Route path="/ecg" element={<EcgDashboard />} />
-            <Route path="/ecg/profile" element={<EcgProfile />} />
+            <Route path="/ecg" element={<ProtectedRoute requiredRole="ecg_lab"><EcgDashboard /></ProtectedRoute>} />
+            <Route path="/ecg/profile" element={<ProtectedRoute requiredRole="ecg_lab"><EcgProfile /></ProtectedRoute>} />
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />

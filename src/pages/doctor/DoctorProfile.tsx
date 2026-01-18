@@ -5,9 +5,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, Phone, Mail, Award, LogOut, Edit2, Check, Building } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "Dr. Anil Mehta",
@@ -18,8 +20,9 @@ const DoctorProfile = () => {
     hospital: "City Hospital, Mumbai",
   });
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
   };
 
   return (

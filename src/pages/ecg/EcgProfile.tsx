@@ -59,7 +59,7 @@ const EcgProfile = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigate("/login");
   };
 
   const handleInputChange = (field: string, value: string) => {

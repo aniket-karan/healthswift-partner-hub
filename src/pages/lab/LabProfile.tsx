@@ -10,9 +10,11 @@ import {
   Building2, FileCheck, Award, Globe, CreditCard, Users, Stethoscope,
   Shield, Calendar, IndianRupee
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const LabProfile = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "LifeCare Diagnostics",
@@ -38,8 +40,9 @@ const LabProfile = () => {
     averageReportTime: "24-48 hours",
   });
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
   };
 
   const ProfileField = ({ 

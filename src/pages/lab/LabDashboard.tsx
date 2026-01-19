@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -654,6 +655,9 @@ const LabDashboard = () => {
               <Eye className="w-5 h-5" />
               Preview Report Before Upload
             </DialogTitle>
+            <DialogDescription>
+              Select a report file to preview before uploading. Supported formats: PDF, JPG, JPEG, PNG.
+            </DialogDescription>
           </DialogHeader>
           
           <div className="flex-1 overflow-auto">

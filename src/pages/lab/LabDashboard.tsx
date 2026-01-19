@@ -18,6 +18,7 @@ import {
 type PaymentStatus = "unpaid" | "paid_online" | "paid_cash";
 type TimeFilter = "daily" | "weekly" | "monthly" | "yearly";
 type TransactionType = "credit" | "debit";
+type ReportStatus = "pending" | "uploaded";
 
 interface Transaction {
   id: number;
@@ -34,6 +35,7 @@ interface AssignedPatient {
   test: string;
   collectionComplete: boolean;
   paymentStatus: PaymentStatus;
+  reportStatus: ReportStatus;
 }
 
 // Sample data for different time filters - Patient stats
@@ -150,24 +152,35 @@ const LabDashboard = () => {
     }, 50000); // Starting balance
   }, []);
 
-  const stats = [
-    { label: "Today's Assigned Patients", value: "24", icon: Users, color: "text-primary", expandKey: "patients" },
-    { label: "Current Balance", value: `₹${currentBalance.toLocaleString()}`, icon: IndianRupee, color: "text-[hsl(158_64%_45%)]", expandKey: "balance" },
-    { label: "Pending Reports", value: "12", icon: Clock, color: "text-[hsl(38_92%_50%)]", expandKey: null },
-    { label: "Uploaded Reports", value: "156", icon: CheckCircle, color: "text-secondary", expandKey: null },
-  ];
-
   const [assignedPatients, setAssignedPatients] = useState<AssignedPatient[]>([
-    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", collectionComplete: false, paymentStatus: "unpaid" },
-    { id: 2, name: "Meera Gupta", test: "Lipid Profile", collectionComplete: true, paymentStatus: "paid_online" },
-    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", collectionComplete: false, paymentStatus: "unpaid" },
-    { id: 4, name: "Anjali Sharma", test: "HbA1c", collectionComplete: false, paymentStatus: "paid_cash" },
+    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
+    { id: 2, name: "Meera Gupta", test: "Lipid Profile", collectionComplete: true, paymentStatus: "paid_online", reportStatus: "uploaded" },
+    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
+    { id: 4, name: "Anjali Sharma", test: "HbA1c", collectionComplete: false, paymentStatus: "paid_cash", reportStatus: "pending" },
   ]);
 
   const [cashPaymentDialog, setCashPaymentDialog] = useState<{ open: boolean; patientId: number | null }>({
     open: false,
     patientId: null,
   });
+
+  const [uploadDialog, setUploadDialog] = useState<{ open: boolean; patientId: number | null }>({
+    open: false,
+    patientId: null,
+  });
+
+  const [uploadSuccessDialog, setUploadSuccessDialog] = useState(false);
+
+  // Calculate dynamic stats based on assignedPatients
+  const pendingReportsCount = assignedPatients.filter(p => p.reportStatus === "pending").length;
+  const uploadedReportsCount = assignedPatients.filter(p => p.reportStatus === "uploaded").length;
+
+  const stats = [
+    { label: "Today's Assigned Patients", value: String(assignedPatients.length), icon: Users, color: "text-primary", expandKey: "patients" },
+    { label: "Current Balance", value: `₹${currentBalance.toLocaleString()}`, icon: IndianRupee, color: "text-[hsl(158_64%_45%)]", expandKey: "balance" },
+    { label: "Pending Reports", value: String(pendingReportsCount), icon: Clock, color: "text-[hsl(38_92%_50%)]", expandKey: null },
+    { label: "Uploaded Reports", value: String(uploadedReportsCount), icon: CheckCircle, color: "text-secondary", expandKey: null },
+  ];
 
   const toggleCollection = (id: number) => {
     setAssignedPatients(prev => prev.map(p => p.id === id ? { ...p, collectionComplete: !p.collectionComplete } : p));
@@ -188,6 +201,24 @@ const LabDashboard = () => {
 
   const handleCashPaymentCancel = () => {
     setCashPaymentDialog({ open: false, patientId: null });
+  };
+
+  const handleUploadClick = (id: number) => {
+    setUploadDialog({ open: true, patientId: id });
+  };
+
+  const handleUploadConfirm = () => {
+    if (uploadDialog.patientId) {
+      setAssignedPatients(prev => prev.map(p => 
+        p.id === uploadDialog.patientId ? { ...p, reportStatus: "uploaded" as const } : p
+      ));
+    }
+    setUploadDialog({ open: false, patientId: null });
+    setUploadSuccessDialog(true);
+  };
+
+  const handleUploadCancel = () => {
+    setUploadDialog({ open: false, patientId: null });
   };
 
   const handleStatClick = (expandKey: string | null) => {
@@ -480,15 +511,24 @@ const LabDashboard = () => {
                         <Droplets className="w-4 h-4" />
                         <span className="hidden sm:inline">{patient.collectionComplete ? "Collected" : "Collect"}</span>
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                        onClick={() => navigate("/lab/upload")}
-                      >
-                        <Upload className="w-4 h-4" />
-                        <span className="hidden sm:inline">Upload</span>
-                      </Button>
+                      {patient.reportStatus === "uploaded" ? (
+                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" />
+                          <span className="hidden sm:inline">Report Uploaded</span>
+                          <span className="sm:hidden">Uploaded</span>
+                        </span>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => handleUploadClick(patient.id)}
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span className="hidden sm:inline">Upload Final Report</span>
+                          <span className="sm:hidden">Upload</span>
+                        </Button>
+                      )}
                     </div>
 
                     {/* 3. Payment Status */}
@@ -543,6 +583,48 @@ const LabDashboard = () => {
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleCashPaymentConfirm}>
               Payment Received Successfully
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Upload Report Confirmation Dialog */}
+      <AlertDialog open={uploadDialog.open} onOpenChange={(open) => {
+        if (!open) handleUploadCancel();
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Upload Final Report</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to upload the final report for this patient? This will mark the report as complete.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleUploadCancel}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleUploadConfirm}>
+              Upload Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Upload Success Dialog */}
+      <AlertDialog open={uploadSuccessDialog} onOpenChange={setUploadSuccessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-[hsl(158_64%_45%)]">
+              <CheckCircle className="w-5 h-5" />
+              Report Uploaded Successfully
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The final report has been uploaded successfully and is now available for the patient.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setUploadSuccessDialog(false)}>
+              Done
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,8 +1,8 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical, MapPin, Eye, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import {
   AlertDialog,
@@ -14,6 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type PaymentStatus = "unpaid" | "paid_online" | "paid_cash";
 type TimeFilter = "daily" | "weekly" | "monthly" | "yearly";
@@ -33,6 +40,7 @@ interface AssignedPatient {
   id: number;
   name: string;
   test: string;
+  address: string;
   collectionComplete: boolean;
   paymentStatus: PaymentStatus;
   reportStatus: ReportStatus;
@@ -153,10 +161,10 @@ const LabDashboard = () => {
   }, []);
 
   const [assignedPatients, setAssignedPatients] = useState<AssignedPatient[]>([
-    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
-    { id: 2, name: "Meera Gupta", test: "Lipid Profile", collectionComplete: true, paymentStatus: "paid_online", reportStatus: "uploaded" },
-    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
-    { id: 4, name: "Anjali Sharma", test: "HbA1c", collectionComplete: false, paymentStatus: "paid_cash", reportStatus: "pending" },
+    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", address: "123, MG Road, Sector 14, Gurgaon", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
+    { id: 2, name: "Meera Gupta", test: "Lipid Profile", address: "45, Lajpat Nagar, New Delhi", collectionComplete: true, paymentStatus: "paid_online", reportStatus: "uploaded" },
+    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", address: "78, Koramangala 4th Block, Bangalore", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
+    { id: 4, name: "Anjali Sharma", test: "HbA1c", address: "202, Andheri West, Mumbai", collectionComplete: false, paymentStatus: "paid_cash", reportStatus: "pending" },
   ]);
 
   const [cashPaymentDialog, setCashPaymentDialog] = useState<{ open: boolean; patientId: number | null }>({
@@ -170,6 +178,15 @@ const LabDashboard = () => {
   });
 
   const [uploadSuccessDialog, setUploadSuccessDialog] = useState(false);
+
+  // Report preview state
+  const [previewDialog, setPreviewDialog] = useState<{ open: boolean; patientId: number | null }>({
+    open: false,
+    patientId: null,
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calculate dynamic stats based on assignedPatients
   const pendingReportsCount = assignedPatients.filter(p => p.reportStatus === "pending").length;
@@ -204,7 +221,37 @@ const LabDashboard = () => {
   };
 
   const handleUploadClick = (id: number) => {
-    setUploadDialog({ open: true, patientId: id });
+    setPreviewDialog({ open: true, patientId: id });
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      // Create preview URL for images and PDFs
+      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      }
+    }
+  };
+
+  const handlePreviewConfirm = () => {
+    if (selectedFile && previewDialog.patientId) {
+      setPreviewDialog({ open: false, patientId: null });
+      setUploadDialog({ open: true, patientId: previewDialog.patientId });
+    }
+  };
+
+  const handlePreviewCancel = () => {
+    setPreviewDialog({ open: false, patientId: null });
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
   };
 
   const handleUploadConfirm = () => {
@@ -214,6 +261,11 @@ const LabDashboard = () => {
       ));
     }
     setUploadDialog({ open: false, patientId: null });
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setSelectedFile(null);
+    setPreviewUrl(null);
     setUploadSuccessDialog(true);
   };
 
@@ -484,6 +536,10 @@ const LabDashboard = () => {
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground lg:text-lg">{patient.name}</h3>
                     <p className="text-sm lg:text-base text-muted-foreground">{patient.test}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      <p className="text-xs lg:text-sm text-muted-foreground truncate">{patient.address}</p>
+                    </div>
                   </div>
 
                   {/* Actions Row */}
@@ -588,6 +644,99 @@ const LabDashboard = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Report Preview Dialog */}
+      <Dialog open={previewDialog.open} onOpenChange={(open) => {
+        if (!open) handlePreviewCancel();
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Preview Report Before Upload
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-auto">
+            {/* File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              accept=".pdf,.jpg,.jpeg,.png"
+              className="hidden"
+            />
+            
+            {!selectedFile ? (
+              <div 
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-foreground font-medium mb-2">Click to select report file</p>
+                <p className="text-sm text-muted-foreground">Supports PDF, JPG, JPEG, PNG</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* File Info */}
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (previewUrl) URL.revokeObjectURL(previewUrl);
+                      setSelectedFile(null);
+                      setPreviewUrl(null);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Preview Area */}
+                {previewUrl && (
+                  <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
+                    {selectedFile.type.startsWith('image/') ? (
+                      <img 
+                        src={previewUrl} 
+                        alt="Report preview" 
+                        className="max-h-[400px] w-auto mx-auto object-contain"
+                      />
+                    ) : selectedFile.type === 'application/pdf' ? (
+                      <iframe
+                        src={previewUrl}
+                        className="w-full h-[400px]"
+                        title="PDF Preview"
+                      />
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={handlePreviewCancel}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handlePreviewConfirm}
+              disabled={!selectedFile}
+            >
+              Confirm & Upload
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Upload Report Confirmation Dialog */}
       <AlertDialog open={uploadDialog.open} onOpenChange={(open) => {
         if (!open) handleUploadCancel();
@@ -596,7 +745,7 @@ const LabDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Upload Final Report</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to upload the final report for this patient? This will mark the report as complete.
+              Are you sure you want to upload "{selectedFile?.name}" as the final report for this patient? This will mark the report as complete.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

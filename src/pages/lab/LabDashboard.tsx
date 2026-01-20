@@ -1,5 +1,6 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical, MapPin, Eye, X } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical, MapPin, Eye, X, Phone, Package, Truck, FlaskRound, UserPlus } from "lucide-react";
+import expandIcon from "@/assets/expand-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useMemo, useRef } from "react";
@@ -27,6 +28,14 @@ type PaymentStatus = "unpaid" | "paid_online" | "paid_cash";
 type TimeFilter = "daily" | "weekly" | "monthly" | "yearly";
 type TransactionType = "credit" | "debit";
 type ReportStatus = "pending" | "uploaded";
+type WorkflowStep = "assign" | "out_for_collection" | "collection_complete" | "payment_done" | "sample_received";
+
+interface DeliveryPartner {
+  id: number;
+  name: string;
+  phone: string;
+  available: boolean;
+}
 
 interface Transaction {
   id: number;
@@ -40,11 +49,14 @@ interface Transaction {
 interface AssignedPatient {
   id: number;
   name: string;
+  phone: string;
   test: string;
   address: string;
   collectionComplete: boolean;
   paymentStatus: PaymentStatus;
   reportStatus: ReportStatus;
+  workflowStep: WorkflowStep;
+  assignedPartner: DeliveryPartner | null;
 }
 
 // Sample data for different time filters - Patient stats
@@ -161,11 +173,19 @@ const LabDashboard = () => {
     }, 50000); // Starting balance
   }, []);
 
+  // Sample delivery partners
+  const deliveryPartners: DeliveryPartner[] = [
+    { id: 1, name: "Ramesh Kumar", phone: "+91 98765 43210", available: true },
+    { id: 2, name: "Sunil Sharma", phone: "+91 87654 32109", available: true },
+    { id: 3, name: "Vikash Verma", phone: "+91 76543 21098", available: false },
+    { id: 4, name: "Amit Patel", phone: "+91 65432 10987", available: true },
+  ];
+
   const [assignedPatients, setAssignedPatients] = useState<AssignedPatient[]>([
-    { id: 1, name: "Ravi Singh", test: "Complete Blood Count", address: "123, MG Road, Sector 14, Gurgaon", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
-    { id: 2, name: "Meera Gupta", test: "Lipid Profile", address: "45, Lajpat Nagar, New Delhi", collectionComplete: true, paymentStatus: "paid_online", reportStatus: "uploaded" },
-    { id: 3, name: "Suresh Yadav", test: "Thyroid Panel", address: "78, Koramangala 4th Block, Bangalore", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending" },
-    { id: 4, name: "Anjali Sharma", test: "HbA1c", address: "202, Andheri West, Mumbai", collectionComplete: false, paymentStatus: "paid_cash", reportStatus: "pending" },
+    { id: 1, name: "Ravi Singh", phone: "+91 99887 76655", test: "Complete Blood Count", address: "123, MG Road, Sector 14, Gurgaon", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending", workflowStep: "assign", assignedPartner: null },
+    { id: 2, name: "Meera Gupta", phone: "+91 88776 65544", test: "Lipid Profile", address: "45, Lajpat Nagar, New Delhi", collectionComplete: true, paymentStatus: "paid_online", reportStatus: "uploaded", workflowStep: "sample_received", assignedPartner: { id: 1, name: "Ramesh Kumar", phone: "+91 98765 43210", available: true } },
+    { id: 3, name: "Suresh Yadav", phone: "+91 77665 54433", test: "Thyroid Panel", address: "78, Koramangala 4th Block, Bangalore", collectionComplete: false, paymentStatus: "unpaid", reportStatus: "pending", workflowStep: "out_for_collection", assignedPartner: { id: 2, name: "Sunil Sharma", phone: "+91 87654 32109", available: true } },
+    { id: 4, name: "Anjali Sharma", phone: "+91 66554 43322", test: "HbA1c", address: "202, Andheri West, Mumbai", collectionComplete: false, paymentStatus: "paid_cash", reportStatus: "pending", workflowStep: "collection_complete", assignedPartner: { id: 4, name: "Amit Patel", phone: "+91 65432 10987", available: true } },
   ]);
 
   const [cashPaymentDialog, setCashPaymentDialog] = useState<{ open: boolean; patientId: number | null }>({
@@ -188,6 +208,15 @@ const LabDashboard = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Expanded tiles state
+  const [expandedPatients, setExpandedPatients] = useState<Set<number>>(new Set());
+
+  // Assign delivery partner dialog state
+  const [assignDialog, setAssignDialog] = useState<{ open: boolean; patientId: number | null }>({
+    open: false,
+    patientId: null,
+  });
 
   // Calculate dynamic stats based on assignedPatients
   const pendingReportsCount = assignedPatients.filter(p => p.reportStatus === "pending").length;
@@ -282,6 +311,66 @@ const LabDashboard = () => {
       setIsBalanceExpanded(!isBalanceExpanded);
       setIsPatientGraphExpanded(false);
     }
+  };
+
+  // Toggle patient tile expansion
+  const togglePatientExpand = (patientId: number) => {
+    setExpandedPatients(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(patientId)) {
+        newSet.delete(patientId);
+      } else {
+        newSet.add(patientId);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle assign click
+  const handleAssignClick = (patientId: number) => {
+    setAssignDialog({ open: true, patientId });
+  };
+
+  // Handle delivery partner assignment
+  const handleAssignPartner = (partner: DeliveryPartner) => {
+    if (assignDialog.patientId) {
+      setAssignedPatients(prev => prev.map(p => 
+        p.id === assignDialog.patientId 
+          ? { ...p, assignedPartner: partner, workflowStep: "out_for_collection" as WorkflowStep } 
+          : p
+      ));
+    }
+    setAssignDialog({ open: false, patientId: null });
+  };
+
+  // Handle workflow step update
+  const updateWorkflowStep = (patientId: number, step: WorkflowStep) => {
+    setAssignedPatients(prev => prev.map(p => {
+      if (p.id === patientId) {
+        const updates: Partial<AssignedPatient> = { workflowStep: step };
+        if (step === "collection_complete") {
+          updates.collectionComplete = true;
+        }
+        return { ...p, ...updates };
+      }
+      return p;
+    }));
+  };
+
+  // Get workflow step number
+  const getWorkflowStepNumber = (step: WorkflowStep): number => {
+    const steps: WorkflowStep[] = ["assign", "out_for_collection", "collection_complete", "payment_done", "sample_received"];
+    return steps.indexOf(step) + 1;
+  };
+
+  // Check if step is completed
+  const isStepCompleted = (patientStep: WorkflowStep, checkStep: WorkflowStep): boolean => {
+    return getWorkflowStepNumber(patientStep) > getWorkflowStepNumber(checkStep);
+  };
+
+  // Check if step is current
+  const isStepCurrent = (patientStep: WorkflowStep, checkStep: WorkflowStep): boolean => {
+    return patientStep === checkStep;
   };
 
   const timeFilters: { key: TimeFilter; label: string }[] = [
@@ -530,95 +619,268 @@ const LabDashboard = () => {
           </div>
 
           <div className="flex flex-col gap-3 lg:gap-4">
-            {assignedPatients.map((patient) => (
-              <GlassCard key={patient.id} className="p-4 lg:p-5">
-                <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                  {/* Patient Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground lg:text-lg">{patient.name}</h3>
-                    <p className="text-sm lg:text-base text-muted-foreground">{patient.test}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                      <p className="text-xs lg:text-sm text-muted-foreground truncate">{patient.address}</p>
+            {assignedPatients.map((patient) => {
+              const isExpanded = expandedPatients.has(patient.id);
+              
+              return (
+                <GlassCard key={patient.id} className="p-4 lg:p-5 overflow-hidden">
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Patient Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground lg:text-lg">{patient.name}</h3>
+                      <p className="text-sm lg:text-base text-muted-foreground">{patient.test}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <p className="text-xs lg:text-sm text-muted-foreground truncate">{patient.address}</p>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Phone className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <p className="text-xs lg:text-sm text-muted-foreground">{patient.phone}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Actions Row */}
-                  <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-                    {/* 1. View Prescription */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => navigate("/lab/upload")}
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span className="hidden sm:inline">View Prescription</span>
-                      <span className="sm:hidden">Rx</span>
-                    </Button>
-
-                    {/* 2. Blood Collection + Upload */}
-                    <div className="flex items-center gap-1">
+                    {/* Actions Row */}
+                    <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+                      {/* 1. View Prescription */}
                       <Button
-                        variant={patient.collectionComplete ? "default" : "outline"}
+                        variant="outline"
                         size="sm"
-                        className="gap-1"
-                        onClick={() => toggleCollection(patient.id)}
+                        className="gap-1.5"
+                        onClick={() => navigate("/lab/upload")}
                       >
-                        <Droplets className="w-4 h-4" />
-                        <span className="hidden sm:inline">{patient.collectionComplete ? "Collected" : "Collect"}</span>
+                        <FileText className="w-4 h-4" />
+                        <span className="hidden sm:inline">View Prescription</span>
+                        <span className="sm:hidden">Rx</span>
                       </Button>
-                      {patient.reportStatus === "uploaded" ? (
-                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
-                          <CheckCircle className="w-4 h-4" />
-                          <span className="hidden sm:inline">Report Uploaded</span>
-                          <span className="sm:hidden">Uploaded</span>
-                        </span>
-                      ) : (
+
+                      {/* 2. Blood Collection + Upload */}
+                      <div className="flex items-center gap-1">
                         <Button
-                          variant="outline"
+                          variant={patient.collectionComplete ? "default" : "outline"}
                           size="sm"
                           className="gap-1"
-                          onClick={() => handleUploadClick(patient.id)}
+                          onClick={() => toggleCollection(patient.id)}
                         >
-                          <Upload className="w-4 h-4" />
-                          <span className="hidden sm:inline">Upload Final Report</span>
-                          <span className="sm:hidden">Upload</span>
+                          <Droplets className="w-4 h-4" />
+                          <span className="hidden sm:inline">{patient.collectionComplete ? "Collected" : "Collect"}</span>
                         </Button>
-                      )}
-                    </div>
+                        {patient.reportStatus === "uploaded" ? (
+                          <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="hidden sm:inline">Report Uploaded</span>
+                            <span className="sm:hidden">Uploaded</span>
+                          </span>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => handleUploadClick(patient.id)}
+                          >
+                            <Upload className="w-4 h-4" />
+                            <span className="hidden sm:inline">Upload Final Report</span>
+                            <span className="sm:hidden">Upload</span>
+                          </Button>
+                        )}
+                      </div>
 
-                    {/* 3. Payment Status */}
-                    <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-                      {patient.paymentStatus === "paid_online" ? (
-                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
-                          <CreditCard className="w-4 h-4" />
-                          <span className="hidden sm:inline">Paid Online</span>
-                          <span className="sm:hidden">Paid</span>
-                        </span>
-                      ) : patient.paymentStatus === "paid_cash" ? (
-                        <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
-                          <Banknote className="w-4 h-4" />
-                          <span className="hidden sm:inline">Paid Cash</span>
-                          <span className="sm:hidden">Paid</span>
-                        </span>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleUnpaidClick(patient.id)}
-                        >
-                          <Banknote className="w-4 h-4" />
-                          <span className="hidden sm:inline">Unpaid</span>
-                          <span className="sm:hidden">Unpaid</span>
-                        </Button>
-                      )}
+                      {/* 3. Payment Status */}
+                      <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+                        {patient.paymentStatus === "paid_online" ? (
+                          <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                            <CreditCard className="w-4 h-4" />
+                            <span className="hidden sm:inline">Paid Online</span>
+                            <span className="sm:hidden">Paid</span>
+                          </span>
+                        ) : patient.paymentStatus === "paid_cash" ? (
+                          <span className="px-2 py-1 text-sm font-medium text-[hsl(158_64%_45%)] bg-[hsl(158_64%_45%)]/10 rounded flex items-center gap-1">
+                            <Banknote className="w-4 h-4" />
+                            <span className="hidden sm:inline">Paid Cash</span>
+                            <span className="sm:hidden">Paid</span>
+                          </span>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleUnpaidClick(patient.id)}
+                          >
+                            <Banknote className="w-4 h-4" />
+                            <span className="hidden sm:inline">Unpaid</span>
+                            <span className="sm:hidden">Unpaid</span>
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Expand Button */}
+                      <button
+                        onClick={() => togglePatientExpand(patient.id)}
+                        className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        title="View workflow"
+                      >
+                        <img 
+                          src={expandIcon} 
+                          alt="Expand" 
+                          className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                        />
+                      </button>
                     </div>
                   </div>
-                </div>
-              </GlassCard>
-            ))}
+
+                  {/* Expandable Workflow Section */}
+                  {isExpanded && (
+                    <div className="mt-6 pt-4 border-t border-border slide-up">
+                      <h4 className="text-sm font-semibold text-foreground mb-4">Collection Workflow</h4>
+                      
+                      {/* Workflow Steps */}
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+                        {/* Step 1: Assign */}
+                        <div className="flex items-center gap-2 sm:flex-1">
+                          <div 
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all ${
+                              isStepCompleted(patient.workflowStep, "assign")
+                                ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)]"
+                                : isStepCurrent(patient.workflowStep, "assign")
+                                  ? "bg-primary/10 text-primary border border-primary/30"
+                                  : "bg-muted/50 text-muted-foreground"
+                            }`}
+                            onClick={() => handleAssignClick(patient.id)}
+                          >
+                            <UserPlus className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              {patient.assignedPartner ? patient.assignedPartner.name.split(' ')[0] : 'Assign'}
+                            </span>
+                            {isStepCompleted(patient.workflowStep, "assign") && <CheckCircle className="w-3.5 h-3.5" />}
+                          </div>
+                        </div>
+                        
+                        <div className="hidden sm:block w-8 h-0.5 bg-border" />
+                        
+                        {/* Step 2: Out for Collection */}
+                        <div className="flex items-center gap-2 sm:flex-1">
+                          <div 
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                              isStepCompleted(patient.workflowStep, "out_for_collection")
+                                ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)] cursor-default"
+                                : isStepCurrent(patient.workflowStep, "out_for_collection")
+                                  ? "bg-primary/10 text-primary border border-primary/30 cursor-default"
+                                  : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-60"
+                            }`}
+                          >
+                            <Truck className="w-4 h-4" />
+                            <span className="text-xs font-medium">Out for Collection</span>
+                            {isStepCompleted(patient.workflowStep, "out_for_collection") && <CheckCircle className="w-3.5 h-3.5" />}
+                          </div>
+                        </div>
+                        
+                        <div className="hidden sm:block w-8 h-0.5 bg-border" />
+                        
+                        {/* Step 3: Collection Complete */}
+                        <div className="flex items-center gap-2 sm:flex-1">
+                          <button
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                              isStepCompleted(patient.workflowStep, "collection_complete")
+                                ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)]"
+                                : isStepCurrent(patient.workflowStep, "collection_complete")
+                                  ? "bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20"
+                                  : getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("out_for_collection")
+                                    ? "bg-muted/50 text-muted-foreground hover:bg-muted cursor-pointer"
+                                    : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-60"
+                            }`}
+                            onClick={() => {
+                              if (getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("out_for_collection") && !isStepCompleted(patient.workflowStep, "collection_complete")) {
+                                updateWorkflowStep(patient.id, "collection_complete");
+                              }
+                            }}
+                            disabled={getWorkflowStepNumber(patient.workflowStep) < getWorkflowStepNumber("out_for_collection")}
+                          >
+                            <Droplets className="w-4 h-4" />
+                            <span className="text-xs font-medium">Collection Complete</span>
+                            {isStepCompleted(patient.workflowStep, "collection_complete") && <CheckCircle className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                        
+                        <div className="hidden sm:block w-8 h-0.5 bg-border" />
+                        
+                        {/* Step 4: Payment */}
+                        <div className="flex items-center gap-2 sm:flex-1">
+                          <div 
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                              isStepCompleted(patient.workflowStep, "payment_done") || patient.paymentStatus !== "unpaid"
+                                ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)]"
+                                : isStepCurrent(patient.workflowStep, "payment_done") || (getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("collection_complete") && patient.paymentStatus === "unpaid")
+                                  ? "bg-primary/10 text-primary border border-primary/30 cursor-pointer hover:bg-primary/20"
+                                  : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-60"
+                            }`}
+                            onClick={() => {
+                              if (getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("collection_complete") && patient.paymentStatus === "unpaid") {
+                                handleUnpaidClick(patient.id);
+                              }
+                            }}
+                          >
+                            {patient.paymentStatus === "paid_online" ? (
+                              <>
+                                <CreditCard className="w-4 h-4" />
+                                <span className="text-xs font-medium">Paid Online</span>
+                                <CheckCircle className="w-3.5 h-3.5" />
+                              </>
+                            ) : patient.paymentStatus === "paid_cash" ? (
+                              <>
+                                <Banknote className="w-4 h-4" />
+                                <span className="text-xs font-medium">Paid Cash</span>
+                                <CheckCircle className="w-3.5 h-3.5" />
+                              </>
+                            ) : (
+                              <>
+                                <Banknote className="w-4 h-4" />
+                                <span className="text-xs font-medium">Payment</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="hidden sm:block w-8 h-0.5 bg-border" />
+                        
+                        {/* Step 5: Sample Received */}
+                        <div className="flex items-center gap-2 sm:flex-1">
+                          <button
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                              patient.workflowStep === "sample_received"
+                                ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)]"
+                                : (getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("collection_complete") && patient.paymentStatus !== "unpaid")
+                                  ? "bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20 cursor-pointer"
+                                  : "bg-muted/50 text-muted-foreground cursor-not-allowed opacity-60"
+                            }`}
+                            onClick={() => {
+                              if (getWorkflowStepNumber(patient.workflowStep) >= getWorkflowStepNumber("collection_complete") && patient.paymentStatus !== "unpaid") {
+                                updateWorkflowStep(patient.id, "sample_received");
+                              }
+                            }}
+                            disabled={getWorkflowStepNumber(patient.workflowStep) < getWorkflowStepNumber("collection_complete") || patient.paymentStatus === "unpaid"}
+                          >
+                            <FlaskRound className="w-4 h-4" />
+                            <span className="text-xs font-medium">Sample Received</span>
+                            {patient.workflowStep === "sample_received" && <CheckCircle className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Assigned Partner Info */}
+                      {patient.assignedPartner && (
+                        <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">Assigned Delivery Partner</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">{patient.assignedPartner.name}</span>
+                            <span className="text-xs text-muted-foreground">•</span>
+                            <span className="text-xs text-muted-foreground">{patient.assignedPartner.phone}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </GlassCard>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -782,6 +1044,69 @@ const LabDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Delivery Partner Dialog */}
+      <Dialog open={assignDialog.open} onOpenChange={(open) => {
+        if (!open) setAssignDialog({ open: false, patientId: null });
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Assign Delivery Partner
+            </DialogTitle>
+            <DialogDescription>
+              Select a delivery partner to assign for sample collection.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-3 mt-4">
+            {deliveryPartners.map((partner) => (
+              <div
+                key={partner.id}
+                className={`p-4 rounded-lg border transition-all ${
+                  partner.available
+                    ? "border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
+                    : "border-border/50 bg-muted/30 opacity-60 cursor-not-allowed"
+                }`}
+                onClick={() => {
+                  if (partner.available) {
+                    handleAssignPartner(partner);
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <User className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{partner.name}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {partner.phone}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-1 rounded ${
+                    partner.available
+                      ? "bg-[hsl(158_64%_45%)]/10 text-[hsl(158_64%_45%)]"
+                      : "bg-destructive/10 text-destructive"
+                  }`}>
+                    {partner.available ? "Available" : "Busy"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setAssignDialog({ open: false, patientId: null })}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

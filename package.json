@@ -5,10 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:daemon": "nohup vite --host 0.0.0.0 --port 8080 > vite.log 2>&1 & echo $! > .vite.pid",
+    "stop:dev": "[ -f .vite.pid ] && kill $(cat .vite.pid) && rm .vite.pid || echo 'No dev server pid found'",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:static": "npm run build && (npx serve -s dist -l 8080 > preview.log 2>&1 & echo $! > .preview.pid)",
+    "stop:preview": "[ -f .preview.pid ] && kill $(cat .preview.pid) && rm .preview.pid || echo 'No preview server pid found'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

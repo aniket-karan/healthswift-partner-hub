@@ -1,5 +1,5 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical, MapPin, Eye, X, Phone, Package, Truck, FlaskRound, UserPlus } from "lucide-react";
+import { Users, Bell, Clock, CheckCircle, IndianRupee, User, FileText, Droplets, Upload, CreditCard, Banknote, ChevronDown, ChevronUp, ArrowUpRight, ArrowDownLeft, FlaskConical, MapPin, Eye, X, Phone, Package, Truck, FlaskRound, UserPlus, BarChart3, Zap } from "lucide-react";
 import expandIcon from "@/assets/expand-icon.png";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -391,13 +391,31 @@ const LabDashboard = () => {
           </div>
           <div className="flex items-center gap-2 lg:gap-3">
             <button 
+              onClick={() => navigate("/lab/analytics")}
+              className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
+              title="Analytics"
+            >
+              <BarChart3 className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
+            </button>
+            <button 
               onClick={() => navigate("/lab/tests")}
               className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
               title="Manage Tests"
             >
               <FlaskConical className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
             </button>
-            <button className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow">
+            <button 
+              onClick={() => navigate("/lab/delivery-partners")}
+              className="p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
+              title="Delivery Partners"
+            >
+              <Truck className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
+            </button>
+            <button 
+              onClick={() => navigate("/lab/notifications")}
+              className="relative p-3 rounded-xl bg-card shadow-card border border-border/50 hover:shadow-elevated transition-shadow"
+              title="Notifications"
+            >
               <Bell className="w-5 h-5 lg:w-6 lg:h-6 text-foreground" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full" />
             </button>

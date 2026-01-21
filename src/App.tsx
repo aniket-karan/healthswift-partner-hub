@@ -24,6 +24,9 @@ import LabUpload from "./pages/lab/LabUpload";
 import LabProfile from "./pages/lab/LabProfile";
 import LabTests from "./pages/lab/LabTests";
 import LabBookings from "./pages/lab/LabBookings";
+import LabDeliveryPartners from "./pages/lab/LabDeliveryPartners";
+import LabAnalytics from "./pages/lab/LabAnalytics";
+import LabNotifications from "./pages/lab/LabNotifications";
 
 // Physio Pages
 import PhysioDashboard from "./pages/physio/PhysioDashboard";
@@ -60,6 +63,9 @@ const App = () => (
             <Route path="/lab/tests" element={<ProtectedRoute requiredRole="diagnostic_center"><LabTests /></ProtectedRoute>} />
             <Route path="/lab/bookings" element={<ProtectedRoute requiredRole="diagnostic_center"><LabBookings /></ProtectedRoute>} />
             <Route path="/lab/profile" element={<ProtectedRoute requiredRole="diagnostic_center"><LabProfile /></ProtectedRoute>} />
+            <Route path="/lab/delivery-partners" element={<ProtectedRoute requiredRole="diagnostic_center"><LabDeliveryPartners /></ProtectedRoute>} />
+            <Route path="/lab/analytics" element={<ProtectedRoute requiredRole="diagnostic_center"><LabAnalytics /></ProtectedRoute>} />
+            <Route path="/lab/notifications" element={<ProtectedRoute requiredRole="diagnostic_center"><LabNotifications /></ProtectedRoute>} />
 
             {/* Physio Routes */}
             <Route path="/physio" element={<ProtectedRoute requiredRole="physiotherapist"><PhysioDashboard /></ProtectedRoute>} />
